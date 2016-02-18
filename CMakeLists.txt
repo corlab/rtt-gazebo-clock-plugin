@@ -71,3 +71,6 @@ target_link_libraries(${PROJECT_NAME}
 #set(CMAKE_BUILD_TYPE Debug)
 
 orocos_generate_package()
+
+install(TARGETS ${PROJECT_NAME}
+     LIBRARY DESTINATION lib/orocos/gnulinux/"$${PROJECT_NAME}" COMPONENT libraries)
