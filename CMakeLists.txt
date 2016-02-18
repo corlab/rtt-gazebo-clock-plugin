@@ -73,4 +73,4 @@ target_link_libraries(${PROJECT_NAME}
 orocos_generate_package()
 
 install(TARGETS ${PROJECT_NAME}
-     LIBRARY DESTINATION lib/orocos/gnulinux/"$${PROJECT_NAME}" COMPONENT libraries)
+     LIBRARY DESTINATION "lib/orocos/gnulinux/${PROJECT_NAME}" COMPONENT libraries)
