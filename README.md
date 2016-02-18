@@ -14,3 +14,16 @@ Gazebo system plugin to sync the simulation time between RTT and Gazebo. Based o
 ## TODO
 
 - Exclude Eigen folder
+
+### Build Orocos Toolchain
+
+1. `git clone --recursive https://github.com/orocos-toolchain/orocos_toolchain.git`
+2. set `COR_ORO_PREFIX` to the install prefix
+3. `export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$COR_ORO_PREFIX`
+4. build package by package using: `cmake -DCMAKE_INSTALL_PREFIX=${COR_ORO_PREFIX} -DCMAKE_PREFIX_PATH=${COR_ORO_PREFIX} ..` except for `RTT` and `OCL`
+5. build `RTT` with `cmake -DCMAKE_INSTALL_PREFIX=${COR_ORO_PREFIX} -DCMAKE_PREFIX_PATH=${COR_ORO_PREFIX} -DENABLE_CORBA=ON -DOROCOS_TARGET=gnulinux -DCORBA_IMPLEMENTATION=OMNIORB ..`
+6. build `OCL` with `cmake -DCMAKE_INSTALL_PREFIX=${COR_ORO_PREFIX} -DCMAKE_PREFIX_PATH=${COR_ORO_PREFIX} -DBUILD_TASKBROWSER=ON ..`
+
+// include RTT component in search path
+
+`RTT_COMPONENT_PATH=$RTT_COMPONENT_PATH:${COR_ORO_PREFIX}/lib/orocos:${COR_ORO_PREFIX}/lib/orocos/gnulinux/plugins:${COR_ORO_PREFIX}/lib/orocos/gnulinux/ocl:${COR_ORO_PREFIX}/lib/orocos/gnulinux/ocl/plugins`
