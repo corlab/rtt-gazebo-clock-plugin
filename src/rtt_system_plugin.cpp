@@ -1,4 +1,3 @@
-
 #include <cstdlib>
 
 // Boost
@@ -17,7 +16,6 @@
 #include <ocl/LoggingService.hpp>
 #include <rtt/Logger.hpp>
 
-
 #include <rtt/os/startstop.h>
 #include <rtt/scripting/Scripting.hpp>
 #include <rtt/transports/corba/corba.h>
@@ -30,72 +28,70 @@
 
 using namespace rtt_gazebo_system;
 
-void RTTSystemPlugin::Load(int argc, char **argv)
-{
-  // Initialize RTT
-  __os_init(argc, argv);
+void RTTSystemPlugin::Load(int argc, char **argv) {
+	// Initialize RTT
+	__os_init(argc, argv);
 
-  RTT::Logger::log().setStdStream(std::cerr);
-  RTT::Logger::log().mayLogStdOut(true);
-  RTT::Logger::log().setLogLevel(RTT::Logger::Info);
+	RTT::Logger::log().setStdStream(std::cerr);
+	RTT::Logger::log().mayLogStdOut(true);
+	RTT::Logger::log().setLogLevel(RTT::Logger::Warning);
 
-  // Setup TaskContext server if necessary
-  if(CORBA::is_nil(RTT::corba::TaskContextServer::orb)) {
-	  gzlog << "Launching ORB!" << std::endl;
-    // Initialize orb
-    RTT::corba::TaskContextServer::InitOrb(argc, argv);
-    // Propcess orb requests in a thread
-    RTT::corba::TaskContextServer::ThreadOrb();
-  }
+	// Setup TaskContext server if necessary
+	if (CORBA::is_nil(RTT::corba::TaskContextServer::orb)) {
+		// Initialize orb
+		RTT::corba::TaskContextServer::InitOrb(argc, argv);
+		// Propcess orb requests in a thread
+		RTT::corba::TaskContextServer::ThreadOrb();
+	}
 
 }
 
-void RTTSystemPlugin::Init()
-{
-  // Initialize and enable the simulation clock
-  rtt_clock::enable_sim();
+void RTTSystemPlugin::Init() {
+	// Initialize and enable the simulation clock
+	rtt_clock::enable_sim();
 
-  update_connection_ =
-    gazebo::event::Events::ConnectWorldUpdateEnd(
-        boost::bind(&RTTSystemPlugin::updateClock, this));
+	update_connection_ = gazebo::event::Events::ConnectWorldUpdateEnd(
+			boost::bind(&RTTSystemPlugin::updateClock, this));
 
-  // TODO: Create a worldupdateend connection
-  
-  simulate_clock_ = true;
+	simulate_clock_ = true;
+	clock_changed_ = false;
+
+	// Start update thread
+	update_thread_ = boost::thread(
+			boost::bind(&RTTSystemPlugin::updateClockLoop, this));
 }
 
-RTTSystemPlugin::~RTTSystemPlugin()
-{
-  // Stop the Orb thread
-  if(!CORBA::is_nil(RTT::corba::TaskContextServer::orb)) {
-    RTT::corba::TaskContextServer::ShutdownOrb();
-    RTT::corba::TaskContextServer::DestroyOrb();
-    RTT::corba::TaskContextServer::CleanupServers();
-  }
+RTTSystemPlugin::~RTTSystemPlugin() {
+	// Stop the Orb thread
+	if (!CORBA::is_nil(RTT::corba::TaskContextServer::orb)) {
+		RTT::corba::TaskContextServer::ShutdownOrb();
+		RTT::corba::TaskContextServer::DestroyOrb();
+		RTT::corba::TaskContextServer::CleanupServers();
+	}
 }
 
-void RTTSystemPlugin::updateClock()
-{
-  // Wait for previous update thread
-  if(update_thread_.joinable()) {
-    update_thread_.join();
-  }
-
-  // Start update thread
-  update_thread_ = boost::thread(
-      boost::bind(&RTTSystemPlugin::updateClockLoop, this));
+void RTTSystemPlugin::updateClock() {
+	boost::mutex::scoped_lock lock(update_mutex_);
+	clock_changed_ = true;
+	update_cond_.notify_one();
 }
 
-void RTTSystemPlugin::updateClockLoop()
-{
-  {
-    // Get the simulation time
-    gazebo::common::Time gz_time = gazebo::physics::get_world()->GetSimTime();
+void RTTSystemPlugin::updateClockLoop() {
+	{
+		while (simulate_clock_) {
+			boost::unique_lock<boost::mutex> lock(update_mutex_);
+			while (not clock_changed_) {
+				update_cond_.wait(lock);
+			}
+			// Get the simulation time
+			gazebo::common::Time gz_time =
+					gazebo::physics::get_world()->GetSimTime();
 
-    const uint64_t one_E9 = 1000000000ll;
-
-    rtt_clock::update_sim_clock(gz_time.sec * one_E9 + gz_time.nsec);
-  }
+			// Update the clock from the simulation time and execute the SimClockActivities
+			// NOTE: all Orocos TaskContexts which use a SimClockActivity are updated within this call
+			rtt_clock::update_sim_clock(gz_time.sec * one_E9 + gz_time.nsec);
+		}
+	}
 }
 
 GZ_REGISTER_SYSTEM_PLUGIN(rtt_gazebo_system::RTTSystemPlugin)

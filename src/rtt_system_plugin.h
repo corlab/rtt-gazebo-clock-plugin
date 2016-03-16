@@ -56,6 +56,8 @@ namespace rtt_gazebo_system {
     boost::condition_variable update_cond_;
 
     bool simulate_clock_;
+    bool clock_changed_;
+    const uint64_t one_E9 = 1000000000ll;
 
     void updateClockLoop();
   };
