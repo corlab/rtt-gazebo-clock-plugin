@@ -56,12 +56,20 @@ void RTTSystemPlugin::Init() {
 	simulate_clock_ = true;
 	clock_changed_ = false;
 
-	// Start update thread
+//	stop_connection_ = gazebo::event::Events::ConnectStop(
+//			boost::bind(&RTTSystemPlugin::stop, this));
+
+// Start update thread
 	update_thread_ = boost::thread(
 			boost::bind(&RTTSystemPlugin::updateClockLoop, this));
 }
 
 RTTSystemPlugin::~RTTSystemPlugin() {
+	simulate_clock_ = false;
+	if (update_thread_.joinable()) {
+		update_thread_.join();
+	}
+
 	// Stop the Orb thread
 	if (!CORBA::is_nil(RTT::corba::TaskContextServer::orb)) {
 		RTT::corba::TaskContextServer::ShutdownOrb();
@@ -74,23 +82,54 @@ void RTTSystemPlugin::updateClock() {
 	boost::mutex::scoped_lock lock(update_mutex_);
 	clock_changed_ = true;
 	update_cond_.notify_one();
+
+	//// Notify the update clock loop
+	//boost::lock_guard<boost::mutex> lock(update_mutex_);
+	//update_cond_.notify_one();
 }
 
-void RTTSystemPlugin::updateClockLoop() {
-	{
-		while (simulate_clock_) {
-			boost::unique_lock<boost::mutex> lock(update_mutex_);
-			while (not clock_changed_) {
-				update_cond_.wait(lock);
-			}
-			// Get the simulation time
-			gazebo::common::Time gz_time =
-					gazebo::physics::get_world()->GetSimTime();
+//void RTTSystemPlugin::stop() {
+//	simulate_clock_ = false;
+//}
 
-			// Update the clock from the simulation time and execute the SimClockActivities
-			// NOTE: all Orocos TaskContexts which use a SimClockActivity are updated within this call
-			rtt_clock::update_sim_clock(gz_time.sec * one_E9 + gz_time.nsec);
+void RTTSystemPlugin::updateClockLoop() {
+//
+//	// Wait for update signal to start the loop
+//	{
+//		boost::unique_lock<boost::mutex> lock(update_mutex_);
+//		update_cond_.wait(lock);
+//	}
+//
+//	while (simulate_clock_) {
+//		// Get the simulation time
+//		if (!gazebo::physics::worlds_running()) {
+//			break;
+//		}
+//		const gazebo::physics::WorldPtr world = gazebo::physics::get_world();
+//		if (!world) {
+//			break;
+//		}
+//		// Get the simulation time
+//		gazebo::common::Time gz_time = world->GetSimTime();
+//
+//		// Update the clock from the simulation time and execute the SimClockActivities
+//		// NOTE: all Orocos TaskContexts which use a SimClockActivity are updated within this call
+//		rtt_clock::update_sim_clock(gz_time.sec * one_E9 + gz_time.nsec);
+//	}
+
+	while (simulate_clock_) {
+		boost::unique_lock<boost::mutex> lock(update_mutex_);
+		while (not clock_changed_) {
+			update_cond_.wait(lock);
 		}
+		// Get the simulation time
+		gazebo::common::Time gz_time =
+				gazebo::physics::get_world()->GetSimTime();
+
+		//Update the clock from the simulation time and execute the SimClockActivities
+		// NOTE: all Orocos TaskContexts which use a SimClockActivity are updated within this call
+		rtt_clock::update_sim_clock(gz_time.sec * one_E9 + gz_time.nsec);
+
 	}
 }
 
