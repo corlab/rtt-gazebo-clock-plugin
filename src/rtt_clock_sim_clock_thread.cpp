@@ -104,9 +104,9 @@ bool SimClockThread::updateClockInternal(const RTT::nsecs new_time) {
 	// Check if time restarted
 	if (new_time == 0) {
 
-		RTT::log(RTT::Warning)
-				<< "Time has reset to 0! Re-setting time service..."
-				<< RTT::endlog();
+//		RTT::log(RTT::Warning)
+//				<< "Time has reset to 0! Re-setting time service."
+//				<< RTT::endlog();
 
 		// Re-set the time service and don't update the activities
 		this->resetTimeService();
