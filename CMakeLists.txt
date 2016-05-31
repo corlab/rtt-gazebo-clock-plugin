@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rtt_gazebo_system)
+project(RTTGazeboClockPlugin)
 
 # !!!!! export PKG_CONFIG_PATH=
 
@@ -19,8 +19,12 @@ message(STATUS "GAZEBO version: ${GAZEBO_VERSION}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
 
-set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/eigen/  )
-find_package(Eigen REQUIRED)
+#set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/eigen/  )
+#find_package(Eigen REQUIRED)
+
+find_package(Eigen3 REQUIRED)
+add_definitions(${EIGEN3_DEFINITIONS})
+include_directories(${EIGEN3_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIRS})
 
 find_package(Boost COMPONENTS thread REQUIRED)
 
@@ -34,7 +38,6 @@ link_directories(
 include_directories(include
   ${Boost_INCLUDE_DIR}
   ${GAZEBO_INCLUDE_DIRS}
-  ${Eigen_INCLUDE_DIR}
   ${USE_OROCOS_INCLUDE_DIRS}
   ${PROTOBUF_INCLUDE_DIRS}
   )
@@ -53,8 +56,8 @@ add_library(${PROJECT_NAME} SHARED
   src/rtt_clock.h
   src/rtt_clock_sim_clock_thread.cpp
   src/rtt_clock_sim_clock_thread.h
-  src/rtt_system_plugin.cpp
-  src/rtt_system_plugin.h)
+  src/rtt-gazebo-clock-plugin.cpp
+  src/rtt-gazebo-clock-plugin.h)
 #set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS -DRTT_STATIC)
 
 target_link_libraries(${PROJECT_NAME}

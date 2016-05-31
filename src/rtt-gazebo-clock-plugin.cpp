@@ -1,3 +1,5 @@
+#include "rtt-gazebo-clock-plugin.h"
+
 #include <cstdlib>
 
 // Boost
@@ -24,34 +26,33 @@
 // RTT/ROS Simulation Clock Activity
 #include "rtt_clock.h"
 
-#include "rtt_system_plugin.h"
 
-using namespace rtt_gazebo_system;
+using namespace rtt_gazebo_clock;
 
-void RTTSystemPlugin::Load(int argc, char **argv) {
+void RTTGazeboClockPlugin::Load(int argc, char **argv) {
 	// Initialize RTT
 	__os_init(argc, argv);
 
 	RTT::Logger::log().setStdStream(std::cerr);
 	RTT::Logger::log().mayLogStdOut(true);
-	RTT::Logger::log().setLogLevel(RTT::Logger::Warning);
+	RTT::Logger::log().setLogLevel(RTT::Logger::Info);
 
-	// Setup TaskContext server if necessary
-	if (CORBA::is_nil(RTT::corba::TaskContextServer::orb)) {
-		// Initialize orb
-		RTT::corba::TaskContextServer::InitOrb(argc, argv);
-		// Propcess orb requests in a thread
-		RTT::corba::TaskContextServer::ThreadOrb();
-	}
+//	// Setup TaskContext server if necessary
+//	if (CORBA::is_nil(RTT::corba::TaskContextServer::orb)) {
+//		// Initialize orb
+//		RTT::corba::TaskContextServer::InitOrb(argc, argv);
+//		// Propcess orb requests in a thread
+//		RTT::corba::TaskContextServer::ThreadOrb();
+//	}
 
 }
 
-void RTTSystemPlugin::Init() {
+void RTTGazeboClockPlugin::Init() {
 	// Initialize and enable the simulation clock
 	rtt_clock::enable_sim();
 
 	update_connection_ = gazebo::event::Events::ConnectWorldUpdateEnd(
-			boost::bind(&RTTSystemPlugin::updateClock, this));
+			boost::bind(&RTTGazeboClockPlugin::updateClock, this));
 
 	simulate_clock_ = true;
 	clock_changed_ = false;
@@ -61,10 +62,10 @@ void RTTSystemPlugin::Init() {
 
 // Start update thread
 	update_thread_ = boost::thread(
-			boost::bind(&RTTSystemPlugin::updateClockLoop, this));
+			boost::bind(&RTTGazeboClockPlugin::updateClockLoop, this));
 }
 
-RTTSystemPlugin::~RTTSystemPlugin() {
+RTTGazeboClockPlugin::~RTTGazeboClockPlugin() {
 	simulate_clock_ = false;
 	if (update_thread_.joinable()) {
 		update_thread_.join();
@@ -78,7 +79,7 @@ RTTSystemPlugin::~RTTSystemPlugin() {
 	}
 }
 
-void RTTSystemPlugin::updateClock() {
+void RTTGazeboClockPlugin::updateClock() {
 	boost::mutex::scoped_lock lock(update_mutex_);
 	clock_changed_ = true;
 	update_cond_.notify_one();
@@ -92,7 +93,7 @@ void RTTSystemPlugin::updateClock() {
 //	simulate_clock_ = false;
 //}
 
-void RTTSystemPlugin::updateClockLoop() {
+void RTTGazeboClockPlugin::updateClockLoop() {
 //
 //	// Wait for update signal to start the loop
 //	{
@@ -133,5 +134,5 @@ void RTTSystemPlugin::updateClockLoop() {
 	}
 }
 
-GZ_REGISTER_SYSTEM_PLUGIN(rtt_gazebo_system::RTTSystemPlugin)
+GZ_REGISTER_SYSTEM_PLUGIN(rtt_gazebo_clock::RTTGazeboClockPlugin)
 

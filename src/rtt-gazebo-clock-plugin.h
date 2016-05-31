@@ -26,13 +26,13 @@
 
 #include "rtt_clock.h"
 
-namespace rtt_gazebo_system {
+namespace rtt_gazebo_clock {
 
-  class RTTSystemPlugin : public gazebo::SystemPlugin
+  class RTTGazeboClockPlugin : public gazebo::SystemPlugin
   {
   public:
     //! Disconnect the world event and cleanup CORBA
-    virtual ~RTTSystemPlugin();
+    virtual ~RTTGazeboClockPlugin();
 
     void Load(int argc, char **argv);
     void Init();
