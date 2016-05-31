@@ -3,7 +3,7 @@ project(RTTGazeboClockPlugin)
 
 # !!!!! export PKG_CONFIG_PATH=
 
-find_package(OROCOS-RTT REQUIRED COMPONENTS rtt-scripting rtt-transport-corba rtt-typekit)
+find_package(OROCOS-RTT REQUIRED COMPONENTS rtt-scripting rtt-typekit)
 if (NOT OROCOS-RTT_FOUND)
   message (FATAL_ERROR "\nCould not find Orocos-RTT. Please use the shell command\n 'source orocos_toolchain/env.sh' and then run cmake again.")
 endif()
@@ -45,8 +45,6 @@ include_directories(include
 orocos_use_package( ocl-taskbrowser REQUIRED )
 orocos_use_package( ocl-deployment REQUIRED )
 orocos_use_package( ocl-logging REQUIRED )
-orocos_use_package( orocos-rtt-corba REQUIRED )
-#orocos_use_package( rtt-typekit REQUIRED )
 
 ## Gazebo RTT plugin
 add_definitions(-DRTT_COMPONENT)
@@ -63,8 +61,7 @@ add_library(${PROJECT_NAME} SHARED
 target_link_libraries(${PROJECT_NAME}
   ${GAZEBO_LIBRARIES}
   ${OROCOS-RTT_LIBRARIES} 
-  ${OROCOS-RTT_RTT-SCRIPTING_LIBRARY} 
-  ${OROCOS-RTT_RTT-TRANSPORT-CORBA_LIBRARY}
+  ${OROCOS-RTT_RTT-SCRIPTING_LIBRARY}
   ${OROCOS-RTT_TYPEKIT_LIBRARIES}
   ${USE_OROCOS_LIBRARIES}
   ${Boost_LIBRARIES}
