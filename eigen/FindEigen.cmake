@@ -1,7 +1,0 @@
-FIND_PATH(Eigen_INCLUDE_DIR Eigen/Core /usr/include /usr/include/eigen3 /usr/local/include /usr/local/include/eigen3)
-IF ( Eigen_INCLUDE_DIR )
-    MESSAGE(STATUS "-- Looking for Eigen - found")
-    SET(KDL_CFLAGS "${KDL_CFLAGS} -I${Eigen_INCLUDE_DIR}" CACHE INTERNAL "")
-ELSE ( Eigen_INCLUDE_DIR )
-    MESSAGE(FATAL_ERROR "-- Looking for Eigen - not found")
-ENDIF ( Eigen_INCLUDE_DIR )
