@@ -21,8 +21,6 @@
 
 #include <rtt/os/startstop.h>
 #include <rtt/scripting/Scripting.hpp>
-#include <rtt/transports/corba/corba.h>
-#include <rtt/transports/corba/TaskContextServer.hpp>
 
 #include "rtt_clock.h"
 
