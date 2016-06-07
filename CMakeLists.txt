@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(RTTGazeboClockPlugin)
 
-# !!!!! export PKG_CONFIG_PATH=
+# Inspired by Pouya's solution for https://github.com/corlab/rtt-gazebo-embedded fa8b9b6
+if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
+    # Apparently this is needed as well
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-narrowing")
+endif()
 
 find_package(OROCOS-RTT REQUIRED COMPONENTS rtt-scripting rtt-typekit)
 if (NOT OROCOS-RTT_FOUND)
