@@ -33,18 +33,14 @@ include_directories(${EIGEN3_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIRS})
 
 find_package(Boost COMPONENTS thread REQUIRED)
 
-find_package(Protobuf REQUIRED)
-
 link_directories(
   ${GAZEBO_LIBRARY_DIRS}
-  ${PROTUBUF_LIBRARY_DIRS}
   )
 
 include_directories(include
   ${Boost_INCLUDE_DIR}
   ${GAZEBO_INCLUDE_DIRS}
   ${USE_OROCOS_INCLUDE_DIRS}
-  ${PROTOBUF_INCLUDE_DIRS}
   )
 
 orocos_use_package( ocl-taskbrowser REQUIRED )
@@ -70,7 +66,6 @@ target_link_libraries(${PROJECT_NAME}
   ${OROCOS-RTT_TYPEKIT_LIBRARIES}
   ${USE_OROCOS_LIBRARIES}
   ${Boost_LIBRARIES}
-  ${PROTUBUF_LIBRARIES} 
 )
 
 #set(CMAKE_BUILD_TYPE Debug)
