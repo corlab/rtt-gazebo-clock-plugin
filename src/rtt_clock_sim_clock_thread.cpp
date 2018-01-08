@@ -76,9 +76,10 @@ RTT::os::CleanupFunction cleanup(&SimClockThread::Release);
 }
 
 SimClockThread::SimClockThread() :
-		RTT::os::Thread(ORO_SCHED_OTHER, RTT::os::LowestPriority, 0.0, 0,
-				"rtt_clock_SimClockThread"), time_service_(
-				RTT::os::TimeService::Instance()), process_callbacks_(false) {
+								RTT::os::Thread(ORO_SCHED_OTHER, RTT::os::LowestPriority, 0.0, 0,
+								"rtt_clock_SimClockThread"),
+								time_service_(RTT::os::TimeService::Instance()),
+								process_callbacks_(false) {
 }
 
 SimClockThread::~SimClockThread() {
@@ -90,7 +91,6 @@ bool SimClockThread::simTimeEnabled() const {
 }
 
 bool SimClockThread::updateClock(const RTT::nsecs new_time) {
-
 	return this->updateClockInternal(new_time);
 }
 
@@ -103,14 +103,12 @@ bool SimClockThread::updateClockInternal(const RTT::nsecs new_time) {
 
 	// Check if time restarted
 	if (new_time == 0) {
-
 //		RTT::log(RTT::Warning)
 //				<< "Time has reset to 0! Re-setting time service."
 //				<< RTT::endlog();
 
 		// Re-set the time service and don't update the activities
 		this->resetTimeService();
-
 	} else {
 		// Update the RTT time to match the sim time
 		using namespace RTT::os;
@@ -118,8 +116,7 @@ bool SimClockThread::updateClockInternal(const RTT::nsecs new_time) {
 		//TimeService::Seconds rtt_secs = RTT::nsecs_to_Seconds(TimeService::ticks2nsecs(rtt_ticks));
 
 		// Compute the time update
-		TimeService::Seconds dt = RTT::nsecs_to_Seconds(
-				(new_time - rtt_clock::rtt_now()));
+		TimeService::Seconds dt = RTT::nsecs_to_Seconds(new_time - rtt_clock::rtt_now());
 
 		// Check if time went backwards
 		if (dt < 0) {

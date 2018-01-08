@@ -27,11 +27,26 @@ namespace rtt_clock {
    */
   const uint64_t host_now();
 
+  /** \brief Get the current time according to CLOCK_HOST_REALTIME or the
+   * wall time.
+   */
+  const uint64_t host_wall_now();
+
   /** \brief Get the current time according to RTT
    *
    * If the simulation clock is enabled, this will return the simulated time.
    */
   const uint64_t rtt_now();
+
+  /** \brief Get the current wall time according to RTT
+   *
+   * Even if the simualtion clock is enabled, this will still return the wall
+   * clock time.
+   */
+  const uint64_t rtt_wall_now();
+
+  //! Get the difference in nano seconds between rtt_wall_now() and host_wall_now()
+  const uint64_t host_offset_from_rtt();
 
   //! Set a TaskContext to use a periodic simulation clock activity
   const bool set_sim_clock_activity(RTT::TaskContext *t);
