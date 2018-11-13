@@ -71,7 +71,8 @@ void RTTGazeboClockPlugin::updateClockLoop() {
 			update_cond_.wait(lock);
 		}
 		// Get the simulation time
-		gazebo::common::Time gz_time = gazebo::physics::get_world()->GetSimTime();
+        //gazebo::common::Time gz_time = gazebo::physics::get_world()->GetSimTime();
+        gazebo::common::Time gz_time = gazebo::physics::get_world()->SimTime();
 
 		//Update the clock from the simulation time and execute the SimClockActivities
 		// NOTE: all Orocos TaskContexts which use a SimClockActivity are updated within this call
